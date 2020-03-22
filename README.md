@@ -4,7 +4,7 @@ Mediapy is a script that enables you to download audio or video files from Youtu
 ### Dependencies
 - pytube (for getting the content)
 - progress (for the download visual)
-- selenium (for scarping of links)
+- selenium (for scraping of links)
 - ffmpeg (for performing conversions)
 
 ### Usage
