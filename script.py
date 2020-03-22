@@ -9,10 +9,9 @@ from progress.bar import FillingSquaresBar
 argument_list=sys.argv
 SAVE_PATH="download"
 
-identify_content=argument_list[1] # s for single p for playlist
-file_type=argument_list[2] # m for music v for video
+identify_content=argument_list[1] # s or p
+file_type=argument_list[2] # m or v
 url=argument_list[3]
-
 
 def download_video(link):
     yt=pytube.YouTube(link)
@@ -25,14 +24,21 @@ def download_video(link):
 
 def download_audio(link):
     yt=pytube.YouTube(link)
-    bar=FillingSquaresBar("Downloading audio : ", suffix="%(percent)d%%")
+    bar=FillingSquaresBar("Downloading Audio : ", suffix="%(percent)d%%")
     for i in range(100):
         stream=yt.streams.filter(only_audio=True).first()
-        _filename="audio"
+        _filename=yt.title.replace(" ", "_")
+        _filename=_filename.replace(".", "_")
+        _filename=_filename.replace("$", "_")
+        _filename=_filename.replace("@", "_")
+        _filename=_filename.replace("(", "_")
+        _filename=_filename.replace(")", "_")
         mp4_name="download/%s.mp4"%_filename
         mp3_name="download/%s.mp3"%_filename
         stream.download(SAVE_PATH, _filename)
         bar.next()
+
+    print("\nPerforming required conversions...")
     ffmpeg=('ffmpeg -loglevel panic -i %s ' % mp4_name + mp3_name)
     subprocess.call(ffmpeg, shell=True)
     os.remove(mp4_name)
@@ -44,7 +50,7 @@ if(identify_content=="s" and file_type=="v"):
 if(identify_content=="s" and file_type=="m"):
     download_audio(url)
 
-if(identify_content=="p" and file_type=="v"):
+if(identify_content=="p"):
     options=webdriver.ChromeOptions()
     options.add_argument('headless')
     browser=webdriver.Chrome(chrome_options=options)
@@ -58,7 +64,12 @@ if(identify_content=="p" and file_type=="v"):
     for a_tag in a_tag_list:
         link_list.append(a_tag.get_attribute("href"))
 
-    for i in link_list:
-        download_video(i)
+    if(file_type=="v"):
+        for i in link_list:
+            download_video(i)
+
+    if(file_type=="m"):
+        for i in link_list:
+            download_audio(i)
 
 print("Task completed.")
